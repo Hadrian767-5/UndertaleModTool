@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main  # Altere para o nome da sua branch principal
+  workflow_dispatch:  # Permite executar o workflow manualmente
 
 jobs:
   build:
