@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main  # Altere para o nome da sua branch principal
+  pull_request:
+    branches:
+      - main  # Altere para o nome da sua branch principal
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Passo 1: Checkout do repositório
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Passo 2: Configurar o .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'  # Altere para a versão do .NET que você está usando
+
+      # Passo 3: Restaurar dependências do projeto
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Passo 4: Compilar o projeto
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      # Passo 5: Publicar o APK
+      - name: Publish APK
+        run: dotnet publish -f:net8.0-android -c:Release -p:AndroidPackageFormat=apk
+
+      # Passo 6: Encontrar o APK gerado
+      - name: Find APK
+        id: find-apk
+        run: |
+          APK_PATH=$(find . -name "*.apk" | head -n 1)
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_OUTPUT
+
+      # Passo 7: Fazer upload do APK como um artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release.apk
+          path: ${{ steps.find-apk.outputs.APK_PATH }}
